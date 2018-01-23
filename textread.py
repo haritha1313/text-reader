@@ -11,6 +11,7 @@ import re
 import argparse
 import tempfile
 import shutil
+from autocorrect import spell
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required = True, help = "path to input image")
@@ -70,18 +71,30 @@ augs.extend([inv_neg_ots, inv_neg_eroded])
 
 tempdir = tempfile.mkdtemp()
 temptxt = tempfile.NamedTemporaryFile(mode='w', delete=True)
+"""
+tempdir = "/home/pegasus/Documents/accio_codes/text-reader/images"
+temptxt = "/home/pegasus/Documents/accio_codes/text-reader/files.txt"
+"""
 
-with open(temptxt.name, 'w') as fp:
+with open(temptxt.name, 'w+') as fp:
     for i, img in enumerate(augs):
         pil_image = Image.fromarray(img)
         swt_image = pillowfight.swt(pil_image, output_type = pillowfight.SWT_OUTPUT_ORIGINAL_BOXES)
         filename = str(tempdir + "/" + str(i+1) + '.png')
         swt_image.save(filename, format = 'png')
         fp.write((filename+"\n"))
-    
-os.system('tesseract '+ temptxt.name + ' ~/optt.txt --oem 2')
+
+
+os.system('tesseract '+ temptxt.name + ' optt --oem 2')
 
 temptxt.close()
 shutil.rmtree(tempdir)
 
+print("**Text detection complete**")
+print("**Cleaning...**")
 
+with open('optt.txt', 'r') as fnew:
+    ops = [spell(word) for word in (fnew.read()).split("\n") if len(word)>0]
+    print("The picture most probably reads one of the following:")
+    for w in ops:
+        print(w)
