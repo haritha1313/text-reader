@@ -17,7 +17,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required = True, help = "path to input image")
 args = vars(ap.parse_args())
 
-print("**Loading and preprocessig**")
+print("**Loading and preprocessing**")
 image = cv2.imread(args["image"])
 augs = list()
 
@@ -91,10 +91,18 @@ temptxt.close()
 shutil.rmtree(tempdir)
 
 print("**Text detection complete**")
-print("**Cleaning...**")
+print("**Cleaning**")
 
+ops = []
+ops1 = []
+ans = ""
 with open('optt.txt', 'r') as fnew:
-    ops = [spell(word) for word in (fnew.read()).split("\n") if len(word)>0]
-    print("The picture most probably reads one of the following:")
-    for w in ops:
-        print(w)
+    for count, sentence in enumerate(((fnew.read()).split("\n\n"))):
+            ops.append([(spell(word)).lower() for word in sentence.split() if len(word)>0])
+            
+final = [j for i in ops for j in i]
+[ops1.append(x) for x in final if x not in ops1]
+
+ans = str(' '.join(ops1))
+
+print(ans)
